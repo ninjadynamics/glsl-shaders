@@ -4,6 +4,7 @@
 
 #pragma parameter CURVATURE "Curvature" 0.5 0.0 1.0 0.05
 #pragma parameter SCANSPEED "Scanline Crawl Speed" 1.0 0.0 10.0 0.5
+#pragma parameter BLUR "Blur Strength" 0.5 0.0 1.0 0.05
 
 #if defined(VERTEX)
 
@@ -88,10 +89,11 @@ COMPAT_VARYING vec4 TEX0;
 #define OutSize vec4(OutputSize, 1.0 / OutputSize)
 
 #ifdef PARAMETER_UNIFORM
-uniform COMPAT_PRECISION float CURVATURE, SCANSPEED;
+uniform COMPAT_PRECISION float CURVATURE, SCANSPEED, BLUR;
 #else
 #define CURVATURE 0.5
 #define SCANSPEED 1.0
+#define BLUR      0.5
 #endif
 
 #define iChannel0 Texture
@@ -107,8 +109,9 @@ vec3 sample_( sampler2D tex, vec2 tc )
 
 vec3 blur(sampler2D tex, vec2 tc, float offs)
 {
-	vec4 xoffs = offs * vec4(-2.0, -1.0, 1.0, 2.0) / (iResolution.x * TextureSize.x / InputSize.x);
-	vec4 yoffs = offs * vec4(-2.0, -1.0, 1.0, 2.0) / (iResolution.y * TextureSize.y / InputSize.y);
+        float blur_strength = 1.5 - BLUR;
+	vec4 xoffs = offs * vec4(-2.0, -1.0, 1.0, 2.0) / ((iResolution.x * TextureSize.x / InputSize.x) * blur_strength);
+	vec4 yoffs = offs * vec4(-2.0, -1.0, 1.0, 2.0) / ((iResolution.y * TextureSize.y / InputSize.y) * blur_strength);
    tc = tc * InputSize / TextureSize;
 	
 	vec3 color = vec3(0.0, 0.0, 0.0);
